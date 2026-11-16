@@ -144,7 +144,7 @@ body { display: flex; flex-direction: column; background: var(--abyss); }
       g.innerHTML = '<h2>' + c + '</h2><ul></ul>';
       by[c].forEach(function (m) {
         var li = document.createElement('li'), a = document.createElement('a');
-        a.href = '?n=' + encodeURIComponent(S.slug(m.name));
+        a.href = '?n=' + encodeURIComponent(S.slug(m.name)) + '&c=' + encodeURIComponent(S.slug(m.committee));
         a.innerHTML = '<b></b><span></span>';
         a.querySelector('b').textContent = m.name;
         a.querySelector('span').textContent = m.g === 'f' ? 'نجمة الشهر' : 'نجم الشهر';

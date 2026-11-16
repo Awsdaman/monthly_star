@@ -7,24 +7,15 @@
   /* ---------- Month & members (edit here each month) ---------- */
   var CONFIG = { month: 'أكتوبر', year: '٢٠٢٦', slogan: 'العصر الماسي — يُصنع فيه الأثر', club: 'نادي الحاسبات' };
 
+  // Prototype data: one placeholder member per department.
+  // Each row: [full name, 'f' or 'm' (Arabic wording), department]
   var MEMBERS = [
-    ['ريماس عبدالرحمن الشريف', 'f', 'لجنة جودة الحياة'],
-    ['أحمد زهير مولبي', 'm', 'لجنة جودة الحياة'],
-    ['زكيه مروان ابا', 'f', 'اللجنة الإعلامية'],
-    ['محمد وليد باحشوان', 'm', 'اللجنة الإعلامية'],
-    ['نوره سعد الوذيناني', 'f', 'اللجنة الإعلامية'],
-    ['ريتال مازن مكاوي', 'f', 'اللجنة العلمية'],
-    ['ليان مازن مكاوي', 'f', 'اللجنة العلمية'],
-    ['محمد سامي الغامدي', 'm', 'اللجنة العلمية'],
-    ['رهام عبدالسلام الموتي', 'f', 'لجنة المسابقات والأنشطة الرياضية'],
-    ['ريماس احمد حسان', 'f', 'لجنة المسابقات والأنشطة الرياضية'],
-    ['نجلاء محمد المجايشي', 'f', 'لجنة المسابقات والأنشطة الرياضية'],
-    ['يارا بلقاسم القوزي', 'f', 'لجنة الموارد البشرية'],
-    ['لمار محمد الحربي', 'f', 'لجنة الموارد البشرية'],
-    ['حنين حسن المالكي', 'f', 'لجنة الموارد البشرية'],
-    ['حمد جمعان الغامدي', 'm', 'لجنة الرعايات والشراكات'],
-    ['سفانا عبدالرحمن علي', 'f', 'لجنة الرعايات والشراكات'],
-    ['محمد عبدالرحمن الردادي', 'm', 'لجنة الرعايات والشراكات']
+    ['أوس سمير دمنهوري', 'm', 'لجنة جودة الحياة'],
+    ['أوس سمير دمنهوري', 'm', 'اللجنة الإعلامية'],
+    ['أوس سمير دمنهوري', 'm', 'اللجنة العلمية'],
+    ['أوس سمير دمنهوري', 'm', 'لجنة المسابقات والأنشطة الرياضية'],
+    ['أوس سمير دمنهوري', 'm', 'لجنة الموارد البشرية'],
+    ['أوس سمير دمنهوري', 'm', 'لجنة الرعايات والشراكات']
   ].map(function (r, i) { return { name: r[0], g: r[1], committee: r[2], index: i }; });
 
   function norm(s) {
@@ -40,16 +31,19 @@
     if (!n && location.hash.length > 1) {
       try { n = decodeURIComponent(location.hash.slice(1)); } catch (e) {}
     }
-    if (!n) { try { n = localStorage.getItem('sotm-n'); } catch (e) {} }
     return { n: n || '', g: q && q.get('g'), c: q && q.get('c') };
   }
 
+  // The same name can appear in several departments, so ?c= (department) picks the row.
   var req = readRequested();
-  var hit = null;
-  for (var i = 0; i < MEMBERS.length; i++) if (norm(MEMBERS[i].name) === norm(req.n)) { hit = MEMBERS[i]; break; }
+  var hit = null, byName = MEMBERS.filter(function (x) { return norm(x.name) === norm(req.n); });
+  if (byName.length) {
+    hit = byName[0];
+    if (req.c) byName.forEach(function (x) { if (norm(x.committee) === norm(req.c)) hit = x; });
+  }
   var M = hit || (req.n
-    ? { name: req.n.replace(/[-_+]+/g, ' ').trim(), g: req.g === 'm' ? 'm' : 'f', committee: req.c || CONFIG.club, index: 99 }
-    : MEMBERS[9]);
+    ? { name: req.n.replace(/[-_+]+/g, ' ').trim(), g: req.g === 'm' ? 'm' : 'f', committee: req.c ? req.c.replace(/[-_+]+/g, ' ').trim() : CONFIG.club, index: 99 }
+    : MEMBERS[0]);
 
   function G(f, m) { return M.g === 'f' ? f : m; }
   var parts = M.name.split(' ');
