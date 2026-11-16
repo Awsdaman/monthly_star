@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>جزيرة النادي</title>
+<meta name="theme-color" content="#0c272c">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;600;800;900&display=swap">
+<link rel="stylesheet" href="assets/core.css">
+<style>
+/* Concept م — the club as a tiny isometric island. A drone guides a tour of the six
+   committee buildings; light each one, power the diamond tower, and its beam finds the
+   member's committee. Layout: the island owns the screen; captions dock at the bottom. */
+body { height: 100%; overflow: hidden; background: radial-gradient(80% 60% at 50% 40%, #1d5560, #0c272c 75%); user-select: none; -webkit-user-select: none; }
+#world { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: manipulation; }
+#world .bld { cursor: pointer; }
+#world .bld .win { transition: fill .5s; }
+#world .bld.lit .win { fill: #e9dcc3; }
+#world .bld.gold .win { fill: #fff8ea; }
+#world .bld.gold .face { filter: brightness(1.18); }
+#world .ring { opacity: 0; transition: opacity .4s; pointer-events: none; }
+#world .bld.target .ring { opacity: 1; animation: pulse 1.4s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes pulse { from { transform: scale(.8); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
+#world .flag { transform: scaleY(0); transform-box: fill-box; transform-origin: bottom; transition: transform .6s cubic-bezier(.3, 1.6, .5, 1); }
+#world .bld.lit .flag { transform: none; }
+#world .lbl { font-family: Alexandria, sans-serif; font-weight: 800; font-size: 15px; fill: #fff; paint-order: stroke; stroke: #0c272c; stroke-width: 5px; stroke-linejoin: round; opacity: 0; transition: opacity .4s; pointer-events: none; }
+#world .bld.lit .lbl, #world .bld.target .lbl { opacity: 1; }
+#world.final .bld .lbl { opacity: 0; }
+#world .roof { transition: transform 1.2s cubic-bezier(.3, 1.4, .5, 1); }
+#world .bld.open .roof { transform: translate(-30px, -140px) rotate(-25deg); }
+#world .hero { opacity: 0; transform: translateY(40px); transition: opacity .6s .5s, transform 1.2s .5s cubic-bezier(.2, 1.5, .4, 1); }
+#world .bld.open .hero { opacity: 1; transform: none; }
+#world .beam { stroke-dasharray: 900; stroke-dashoffset: 900; transition: stroke-dashoffset 1.4s ease-in-out; }
+#world .beam.on { stroke-dashoffset: 0; }
+#world .wave { animation: wave 4s ease-in-out infinite; }
+@keyframes wave { 50% { transform: translateY(4px); } }
+#world .boat { animation: sail 22s linear infinite; }
+@keyframes sail { from { transform: translate(-320px, 120px); } to { transform: translate(320px, -60px); } }
+#world .cloud { animation: drift 30s linear infinite; }
+@keyframes drift { from { transform: translateX(-420px); } to { transform: translateX(420px); } }
+#world .tower .core { transition: fill .6s; }
+#world .tower.charged .core { fill: #e9dcc3; }
+#world .tower.target .ring { opacity: 1; animation: pulse 1.4s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+
+/* drone mascot */
+.drone { position: fixed; z-index: 10; width: 64px; left: 0; top: 0; margin: -60px 0 0 -32px; transition: transform 1.3s cubic-bezier(.5, 0, .2, 1); pointer-events: none; }
+.drone svg { width: 100%; height: auto; animation: hover 1.6s ease-in-out infinite; }
+@keyframes hover { 50% { transform: translateY(-6px); } }
+.drone .rot { animation: spin .25s linear infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes spin { to { transform: scaleX(-1); } }
+.drone .say { position: absolute; bottom: 100%; left: 50%; translate: -50% 0; margin-bottom: 6px; width: max-content; max-width: min(60vw, 230px); background: var(--sand); color: var(--abyss); font-weight: 700; font-size: .84rem; line-height: 1.45; padding: .45em .8em; border-radius: 12px; opacity: 0; transition: opacity .25s; text-align: center; }
+.drone .say.show { opacity: 1; }
+
+.cap { position: fixed; z-index: 20; inset-inline: 0; bottom: 0; display: grid; justify-items: center; gap: 8px; text-align: center;
+  padding: 26px max(18px, env(safe-area-inset-right, 0px)) calc(22px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+  background: linear-gradient(180deg, transparent, rgba(6, 22, 25, .82) 30%, rgba(6, 22, 25, .95)); }
+.cap[hidden] { display: none; }
+.cap h1 { margin: 0; font-weight: 900; font-size: clamp(1.8rem, 7.6vw, 2.8rem); line-height: 1.2; color: #fff; text-wrap: balance; }
+.cap p { margin: 0; max-width: 34ch; color: var(--ink-2); }
+.chap { font-size: .78rem; color: var(--taupe-hi); font-weight: 600; }
+.cname { margin: 0; font-weight: 900; font-size: clamp(1.25rem, 5.6vw, 1.7rem); color: #fff; }
+.line { margin: 0; color: var(--ink); font-size: clamp(.98rem, 4vw, 1.12rem); min-height: 1.6em; }
+.hint { color: var(--ink-2); font-size: .84rem; display: flex; gap: 8px; align-items: center; }
+.hint i { width: 10px; height: 10px; border-radius: 50%; background: var(--sand); animation: ping 1.3s infinite; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(233, 220, 195, .6); } 100% { box-shadow: 0 0 0 12px rgba(233, 220, 195, 0); } }
+.stops { display: flex; gap: 6px; }
+.stops b { width: 18px; height: 4px; border-radius: 2px; background: rgba(233, 220, 195, .2); }
+.stops b.on { background: var(--sand); }
+.reveal { display: grid; justify-items: center; gap: 8px; }
+.reveal > * { animation: rise .8s var(--ease-out) both; }
+.reveal > :nth-child(2) { animation-delay: .15s; } .reveal > :nth-child(n+3) { animation-delay: .3s; }
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.reveal .name { margin: 0; font-weight: 900; font-size: clamp(1.9rem, 8.4vw, 3.2rem); line-height: 1.15; color: #fff; text-wrap: balance; }
+.role { display: flex; flex-wrap: wrap; justify-content: center; gap: .3em .7em; }
+.role b { color: var(--taupe-hi); } .role span { color: var(--ink-2); }
+.slogan { color: var(--taupe-hi) !important; font-size: .82rem; }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.actions .btn { min-height: 46px; padding: 0 1.2em; font-size: .92rem; }
+</style>
+</head>
+<body>
+<svg id="world" aria-label="جزيرة نادي الحاسبات" role="img"></svg>
+
+<div class="drone" id="drone" aria-hidden="true">
+  <p class="say" id="say"></p>
+  <svg viewBox="0 0 80 60">
+    <ellipse class="rot" cx="14" cy="10" rx="13" ry="3" fill="#cfe5e8" opacity=".8"/><ellipse class="rot" cx="66" cy="10" rx="13" ry="3" fill="#cfe5e8" opacity=".8"/>
+    <path d="M14 12 V20 M66 12 V20" stroke="#0c272c" stroke-width="3"/>
+    <path d="M10 22 H70" stroke="#0c272c" stroke-width="4" stroke-linecap="round"/>
+    <g transform="translate(22 18) scale(.18)" stroke="#0c272c" stroke-width="12" stroke-linejoin="round"><polygon points="58,12 20,58 65,60" fill="#9fd6de"/><polygon points="58,12 100,12 65,60" fill="#e4f1f2"/><polygon points="100,12 65,60 135,60" fill="#cbe6e9"/><polygon points="100,12 142,12 135,60" fill="#dcecee"/><polygon points="142,12 180,58 135,60" fill="#5fb0bd"/><polygon points="20,58 65,60 100,148" fill="#358b9a"/><polygon points="65,60 135,60 100,148" fill="#9fd6de"/><polygon points="135,60 180,58 100,148" fill="#2a636d"/></g>
+    <ellipse cx="34" cy="32" rx="2.4" ry="3" fill="#0c272c"/><ellipse cx="46" cy="32" rx="2.4" ry="3" fill="#0c272c"/>
+  </svg>
+</div>
+
+<section class="cap" id="intro">
+  <h1>جزيرة نادي الحاسبات</h1>
+  <p id="introText"></p>
+  <button class="btn btn--gold" id="startBtn" type="button"></button>
+</section>
+<section class="cap" id="tour" hidden>
+  <span class="chap" id="chap"></span>
+  <p class="cname" id="cname"></p>
+  <p class="line" id="line" aria-live="polite"></p>
+  <span class="hint" id="hint"><i></i><span id="hintText"></span></span>
+  <div class="stops" id="stops" aria-hidden="true"></div>
+</section>
+<section class="cap reveal" id="reveal" hidden>
+  <h2 class="name" id="name"></h2>
+  <div class="role"><b id="rTitle"></b><span id="rComm"></span></div>
+  <p id="msg"></p>
+  <p class="slogan" id="slogan"></p>
+  <div class="actions">
+    <button class="btn btn--gold" id="saveBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></svg><span id="saveLabel"></span></button>
+    <button class="btn btn--ghost" id="shareBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/></svg>مشاركة</button>
+    <button class="btn btn--ghost" id="againBtn" type="button">من جديد</button>
+  </div>
+</section>
+
+<script src="assets/core.js"></script>
+<script>
+(function () {
+  var S = window.SOTM, m = S.member, G = S.G, $ = S.$;
+  S.sound.mountButton();
+  var NS = 'http://www.w3.org/2000/svg', U = 40, C30 = Math.cos(Math.PI / 6);
+  function iso(x, y, z) { return [(x - y) * C30 * U, (x + y) * .5 * U - (z || 0) * U]; }
+  function pts(arr) { return arr.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' '); }
+  function shade(hex, k) { var n = parseInt(hex.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255; var f = function (v) { return Math.max(0, Math.min(255, Math.round(v * k))); }; return 'rgb(' + f(r) + ',' + f(g) + ',' + f(b) + ')'; }
+  function box(x, y, w, d, h, col, z0) {
+    z0 = z0 || 0;
+    var top = [iso(x, y, z0 + h), iso(x + w, y, z0 + h), iso(x + w, y + d, z0 + h), iso(x, y + d, z0 + h)];
+    var left = [iso(x, y + d, z0), iso(x + w, y + d, z0), iso(x + w, y + d, z0 + h), iso(x, y + d, z0 + h)];
+    var right = [iso(x + w, y, z0), iso(x + w, y + d, z0), iso(x + w, y + d, z0 + h), iso(x + w, y, z0 + h)];
+    return '<polygon class="face" points="' + pts(left) + '" fill="' + shade(col, .78) + '" stroke="#0c272c" stroke-width="1.6" stroke-linejoin="round"/>' +
+      '<polygon class="face" points="' + pts(right) + '" fill="' + shade(col, .6) + '" stroke="#0c272c" stroke-width="1.6" stroke-linejoin="round"/>' +
+      '<polygon class="face" points="' + pts(top) + '" fill="' + col + '" stroke="#0c272c" stroke-width="1.6" stroke-linejoin="round"/>';
+  }
+  function windows(x, y, w, d, h, rows) {
+    var s = '';
+    for (var r = 0; r < rows; r++) for (var k = 0; k < 2; k++) {
+      var zz = .35 + r * (h - .5) / Math.max(1, rows), xx = x + .3 + k * (w - .6) / 1.6;
+      var a = iso(xx, y + d, zz), b = iso(xx + .35, y + d, zz), c = iso(xx + .35, y + d, zz + .3), e = iso(xx, y + d, zz + .3);
+      s += '<polygon class="win" points="' + pts([a, b, c, e]) + '" fill="#0f3238"/>';
+      var yy = y + .3 + k * (d - .6) / 1.6;
+      a = iso(x + w, yy, zz); b = iso(x + w, yy + .35, zz); c = iso(x + w, yy + .35, zz + .3); e = iso(x + w, yy, zz + .3);
+      s += '<polygon class="win" points="' + pts([a, b, c, e]) + '" fill="#0f3238"/>';
+    }
+    return s;
+  }
+
+  /* committees: the member's comes last on the tour */
+  var LINES = {
+    'لجنة جودة الحياة': 'هنا يحرصون أن يكون النادي مكانًا يُحَب.',
+    'اللجنة الإعلامية': 'من هنا تخرج كل صورة وكل خبر عن النادي.',
+    'اللجنة العلمية': 'هنا تولد الورش والأفكار التقنية.',
+    'لجنة المسابقات والأنشطة الرياضية': 'هنا التحدّي والحماس… والكؤوس.',
+    'لجنة الموارد البشرية': 'هنا يعرفون كل عضو، ويهتمّون به.',
+    'لجنة الرعايات والشراكات': 'ومن هنا تُبنى الجسور مع الشركاء.'
+  };
+  var COMMS = [];
+  S.MEMBERS.forEach(function (x) { if (COMMS.indexOf(x.committee) < 0) COMMS.push(x.committee); });
+  var COLORS = ['#5fb0bd', '#c9b28a', '#cfe5e8', '#9f895c', '#358b9a', '#e9dcc3'];
+  var mine = COMMS.indexOf(m.committee);
+  var ORDER = COMMS.map(function (_, i) { return i; }).filter(function (i) { return i !== mine; });
+  if (mine >= 0) ORDER.push(mine);
+
+  /* ---------- build the island ---------- */
+  var world = $('#world');
+  world.setAttribute('viewBox', '-400 -250 800 720');
+  world.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  var g = '';
+  // sea
+  g += '<g class="wave"><polygon points="' + pts([iso(-3, -3), iso(13, -3), iso(13, 13), iso(-3, 13)]) + '" fill="#1a4d55" opacity=".85"/>';
+  for (var k = 0; k < 18; k++) { var a = iso(-2 + (k * 7) % 16, -2 + (k * 5) % 16, 0); g += '<path d="M' + a[0] + ' ' + a[1] + ' q8 -5 16 0 q8 5 16 0" stroke="#5fb0bd" stroke-width="2" fill="none" opacity=".5"/>'; }
+  g += '</g>';
+  g += '<g class="boat"><path d="M-10 0 h28 l-6 8 h-16z" fill="#e9dcc3" stroke="#0c272c" stroke-width="1.5"/><path d="M4 0 v-20 l12 16z" fill="#fff" stroke="#0c272c" stroke-width="1.5"/></g>';
+  // island slab
+  g += box(0, 0, 10, 10, .6, '#c9b28a', -.6).replace(/class="face" /g, '');
+  g += '<polygon points="' + pts([iso(.4, .4), iso(9.6, .4), iso(9.6, 9.6), iso(.4, 9.6)]) + '" fill="#9fc8a8" opacity=".0"/>';
+  // paths to the centre
+  var CX = 5, CY = 5, LOTS = [];
+  for (k = 0; k < 6; k++) { var an = -Math.PI / 2 + k * Math.PI / 3; LOTS.push([CX + Math.cos(an) * 3.3 - .8, CY + Math.sin(an) * 3.3 - .8]); }
+  LOTS.forEach(function (l) { g += '<line x1="' + iso(CX, CY)[0] + '" y1="' + iso(CX, CY)[1] + '" x2="' + iso(l[0] + .8, l[1] + .8)[0] + '" y2="' + iso(l[0] + .8, l[1] + .8)[1] + '" stroke="#e9dcc3" stroke-width="7" stroke-linecap="round" opacity=".7"/>'; });
+  // palm trees sprinkled
+  [[.8, 8.6], [9, 1.2], [8.8, 8.8], [1, 1]].forEach(function (p) { var b = iso(p[0], p[1]); g += '<g transform="translate(' + b[0] + ' ' + b[1] + ')"><path d="M0 0 q-2 -18 3 -30" stroke="#7b6845" stroke-width="3" fill="none"/><g fill="#2a636d" stroke="#0c272c" stroke-width="1"><path d="M3 -30 q-14 -8 -22 2 q10 -4 22 0z"/><path d="M3 -30 q14 -10 22 0 q-10 -4 -22 2z"/><path d="M3 -30 q-6 -14 -16 -14 q10 4 16 14z"/></g></g>'; });
+
+  // buildings, painted back-to-front
+  var items = [];
+  COMMS.forEach(function (name, i) { items.push({ kind: 'b', i: i, x: LOTS[i][0], y: LOTS[i][1] }); });
+  items.push({ kind: 't', x: CX - .7, y: CY - .7 });
+  items.sort(function (a, b) { return (a.x + a.y) - (b.x + b.y); });
+  items.forEach(function (it) {
+    if (it.kind === 't') {
+      var tx = it.x, ty = it.y, top = iso(tx + .7, ty + .7, 5.2);
+      g += '<g class="tower" id="tower">' + box(tx, ty, 1.4, 1.4, 4.2, '#2a636d') + windows(tx, ty, 1.4, 1.4, 4.2, 4) +
+        '<g transform="translate(' + (top[0] - 30) + ' ' + (top[1] - 30) + ') scale(.3)" stroke="#0c272c" stroke-width="10" stroke-linejoin="round"><polygon class="core" points="58,12 20,58 65,60" fill="#9fd6de"/><polygon class="core" points="58,12 100,12 65,60" fill="#e4f1f2"/><polygon class="core" points="100,12 65,60 135,60" fill="#cbe6e9"/><polygon class="core" points="100,12 142,12 135,60" fill="#dcecee"/><polygon class="core" points="142,12 180,58 135,60" fill="#5fb0bd"/><polygon class="core" points="20,58 65,60 100,148" fill="#358b9a"/><polygon class="core" points="65,60 135,60 100,148" fill="#9fd6de"/><polygon class="core" points="135,60 180,58 100,148" fill="#2a636d"/></g>' +
+        '<ellipse class="ring" cx="' + iso(tx + .7, ty + .7)[0] + '" cy="' + iso(tx + .7, ty + .7)[1] + '" rx="60" ry="30" fill="none" stroke="#e9dcc3" stroke-width="3"/></g>';
+      return;
+    }
+    var i = it.i, x = it.x, y = it.y, h = [1.4, 1.9, 1.6, 1.2, 1.7, 1.5][i], col = COLORS[i];
+    var roofTop = iso(x + .8, y + .8, h), flagBase = iso(x + 1.3, y + .3, h);
+    var roof = '';
+    if (i === 0) roof = '<polygon points="' + pts([iso(x, y, h), iso(x + 1.6, y, h), iso(x + .8, y + .8, h + 1), iso(x, y + 1.6, h)]) + '" fill="#2a636d" stroke="#0c272c" stroke-width="1.6"/><polygon points="' + pts([iso(x + 1.6, y, h), iso(x + 1.6, y + 1.6, h), iso(x + .8, y + .8, h + 1), iso(x, y + 1.6, h)]) + '" fill="#1d5560" stroke="#0c272c" stroke-width="1.6"/>';
+    else if (i === 1) roof = '<path d="M' + roofTop[0] + ' ' + roofTop[1] + ' v-38" stroke="#0c272c" stroke-width="2.5"/><circle cx="' + roofTop[0] + '" cy="' + (roofTop[1] - 40) + '" r="6" fill="#e9dcc3" stroke="#0c272c" stroke-width="2"/>';
+    else if (i === 2) roof = '<ellipse cx="' + roofTop[0] + '" cy="' + roofTop[1] + '" rx="34" ry="17" fill="#5fb0bd" stroke="#0c272c" stroke-width="1.6"/><path d="M' + (roofTop[0] - 34) + ' ' + roofTop[1] + ' a34 30 0 0 1 68 0" fill="#9fd6de" stroke="#0c272c" stroke-width="1.6"/>';
+    else if (i === 3) roof = '<g transform="translate(' + roofTop[0] + ' ' + (roofTop[1] - 6) + ')"><path d="M-10 -24 h20 v8 q0 12 -10 12 q-10 0 -10 -12z M-4 -4 h8 v6 h6 v4 h-20 v-4 h6z" fill="#e9dcc3" stroke="#0c272c" stroke-width="1.6"/></g>';
+    else if (i === 4) roof = [[-14, 0], [0, -6], [14, 0]].map(function (o) { return '<circle cx="' + (roofTop[0] + o[0]) + '" cy="' + (roofTop[1] - 12 + o[1]) + '" r="5" fill="#e9dcc3" stroke="#0c272c" stroke-width="1.5"/><path d="M' + (roofTop[0] + o[0] - 7) + ' ' + (roofTop[1] + o[1]) + ' q7 -12 14 0z" fill="#9f895c" stroke="#0c272c" stroke-width="1.5"/>'; }).join('');
+    else roof = '<path d="M' + (roofTop[0] - 22) + ' ' + (roofTop[1] - 6) + ' q22 -26 44 0" fill="none" stroke="#e9dcc3" stroke-width="5" stroke-linecap="round"/>';
+    var lab = iso(x + .8, y + .8, h + 1.6);
+    g += '<g class="bld" data-i="' + i + '" role="button" aria-label="' + COMMS[i] + '">' +
+      '<ellipse class="ring" cx="' + iso(x + .8, y + .8)[0] + '" cy="' + iso(x + .8, y + .8)[1] + '" rx="58" ry="29" fill="none" stroke="#e9dcc3" stroke-width="3"/>' +
+      box(x, y, 1.6, 1.6, h, col) + windows(x, y, 1.6, 1.6, h, h > 1.6 ? 2 : 1) +
+      '<g class="hero"><g transform="translate(' + (roofTop[0] - 12) + ' ' + (roofTop[1] - 64) + ')"><circle cx="12" cy="10" r="9" fill="#e9dcc3" stroke="#0c272c" stroke-width="2"/><path d="M0 44 q12 -34 24 0z" fill="#c9b28a" stroke="#0c272c" stroke-width="2"/><g transform="translate(-6 -30) scale(.18)" stroke="#0c272c" stroke-width="10"><polygon points="58,12 20,58 65,60" fill="#fff8ea"/><polygon points="58,12 100,12 65,60" fill="#fff"/><polygon points="100,12 65,60 135,60" fill="#fff8ea"/><polygon points="100,12 142,12 135,60" fill="#fff"/><polygon points="142,12 180,58 135,60" fill="#e9dcc3"/><polygon points="20,58 65,60 100,148" fill="#c9b28a"/><polygon points="65,60 135,60 100,148" fill="#e9dcc3"/><polygon points="135,60 180,58 100,148" fill="#9f895c"/></g></g></g>' +
+      '<g class="roof">' + roof + '</g>' +
+      '<g class="flag"><path d="M' + flagBase[0] + ' ' + flagBase[1] + ' v-30" stroke="#0c272c" stroke-width="2"/><path d="M' + flagBase[0] + ' ' + (flagBase[1] - 30) + ' l16 5 -16 5z" fill="#e9dcc3" stroke="#0c272c" stroke-width="1.5"/></g>' +
+      '<text class="lbl" x="' + lab[0] + '" y="' + lab[1] + '" text-anchor="middle">' + COMMS[i].replace('لجنة ', '').replace('اللجنة ', '') + '</text></g>';
+  });
+  g += '<line class="beam" id="beam" stroke="#fff8ea" stroke-width="6" stroke-linecap="round" opacity=".9"/>';
+  g += '<g class="cloud"><g transform="translate(0 -190)"><ellipse rx="40" ry="14" fill="#cfe5e8" opacity=".55"/><ellipse cx="26" cy="-8" rx="24" ry="14" fill="#cfe5e8" opacity=".55"/></g></g>';
+  world.innerHTML = g;
+
+  /* ---------- geometry helpers ---------- */
+  function screenOf(el) { var b = el.getBoundingClientRect(); return { x: b.left + b.width / 2, y: b.top + b.height * .35 }; }
+  var drone = $('#drone'), say = $('#say');
+  function droneTo(p) { drone.style.transform = 'translate(' + p.x + 'px,' + p.y + 'px)'; }
+  function speak(t, ms) { say.textContent = t; say.classList.add('show'); clearTimeout(speak.h); if (ms) speak.h = setTimeout(function () { say.classList.remove('show'); }, ms); }
+  droneTo({ x: innerWidth * .78, y: innerHeight * .2 });
+
+  $('#introText').textContent = G('ستّ لجان على جزيرة واحدة. سأطير بكِ في جولة عليها كلها، أضيئي كل مبنى نمرّ به… وفي النهاية سنجد النجم.',
+    'ستّ لجان على جزيرة واحدة. سأطير بك في جولة عليها كلها، أضئ كل مبنى نمرّ به… وفي النهاية سنجد النجم.');
+  $('#startBtn').textContent = G('ابدئي الجولة', 'ابدأ الجولة');
+  $('#hintText').textContent = G('المسي المبنى المضيء لتُشعليه', 'المس المبنى المضيء لتُشعله');
+  $('#name').textContent = m.name;
+  $('#rTitle').textContent = m.title; $('#rComm').textContent = m.committee + ' · ' + S.CONFIG.month + ' ' + S.CONFIG.year;
+  $('#msg').textContent = G('من بين ست لجان وجزيرة كاملة، وجد البرج طريقه إليكِ. شكرًا لأنكِ منّا.', 'من بين ست لجان وجزيرة كاملة، وجد البرج طريقه إليك. شكرًا لأنك منّا.');
+  $('#slogan').textContent = S.CONFIG.slogan;
+  $('#saveLabel').textContent = G('احفظي البطاقة', 'احفظ البطاقة');
+  ORDER.concat([-1]).forEach(function () { $('#stops').appendChild(document.createElement('b')); });
+  setTimeout(function () { speak('أنا درّون! مرشدك فوق الجزيرة.', 3200); }, 700);
+
+  var step = -1, phase = 'intro';
+  function bld(i) { return world.querySelector('.bld[data-i="' + i + '"]'); }
+  function stops(n) { S.$$('#stops b').forEach(function (b, k) { b.classList.toggle('on', k < n); }); }
+
+  function goStop(n) {
+    step = n; stops(n);
+    S.$$('.bld').forEach(function (b) { b.classList.remove('target'); });
+    var last = n === ORDER.length - 1 && mine >= 0;
+    if (n < ORDER.length - (mine >= 0 ? 1 : 0)) {
+      phase = 'visit';
+      var i = ORDER[n], b = bld(i); b.classList.add('target');
+      $('#chap').textContent = 'المحطة ' + '١٢٣٤٥٦٧'[n] + ' من ' + '٧';
+      $('#cname').textContent = COMMS[i];
+      $('#line').textContent = '';
+      $('#hintText').textContent = G('المسي المبنى المضيء لتُشعليه', 'المس المبنى المضيء لتُشعله');
+      droneTo(screenOf(b)); S.sound.play('whoosh');
+    } else {
+      // all others are lit: power the tower
+      phase = 'tower';
+      var t = $('#tower'); t.classList.add('target');
+      $('#chap').textContent = 'المحطة ٦ من ٧';
+      $('#cname').textContent = 'برج الماس';
+      $('#line').textContent = 'كل اللجان أضاءت… والبرج الآن يبحث عن النجم.';
+      $('#hintText').textContent = G('المسي البرج لتشغّليه', 'المس البرج لتشغّله');
+      droneTo(screenOf(t)); S.sound.play('whoosh');
+      speak('شغّل البرج!'.replace('شغّل', G('شغّلي', 'شغّل')), 2400);
+    }
+  }
+
+  world.addEventListener('click', function (e) {
+    var b = e.target.closest('.bld'), t = e.target.closest('.tower');
+    if (phase === 'visit' && b && b.classList.contains('target')) return lightUp(b);
+    if (phase === 'tower' && t) return powerTower();
+    if (phase === 'final' && b && b.classList.contains('target')) return openStar(b);
+    if (phase === 'visit' && b && !b.classList.contains('target')) speak(b.classList.contains('lit') ? 'زرناه من قبل!' : 'ليس بعد، اتبعني!', 1500);
+  });
+
+  function lightUp(b) {
+    phase = 'busy';
+    b.classList.remove('target'); b.classList.add('lit');
+    S.sound.play('lock'); S.sound.play('ping', .8 + step * .12); S.buzz(25);
+    var p = screenOf(b); S.burst(p.x, p.y, 24, { speed: 6 });
+    var i = +b.dataset.i;
+    $('#line').textContent = LINES[COMMS[i]] || 'لجنة تصنع الفرق.';
+    speak(['أضاءت!', 'جميل!', 'رائع!', 'مبنى آخر يضيء!', 'تكاد الجزيرة تكتمل!'][step % 5], 1600);
+    setTimeout(function () { goStop(step + 1); }, 2600);
+  }
+
+  function powerTower() {
+    phase = 'busy';
+    var t = $('#tower'); t.classList.remove('target'); t.classList.add('charged');
+    S.sound.play('reveal'); S.buzz([30, 30, 60]);
+    var tp = screenOf(t); S.burst(tp.x, tp.y, 40, { speed: 8 });
+    $('#line').textContent = 'البرج يبحث…';
+    if (mine < 0) { setTimeout(function () { finale(null); }, 1400); return; }
+    var target = bld(mine), beam = $('#beam');
+    var top = iso(CX, CY, 5.4), dest = iso(LOTS[mine][0] + .8, LOTS[mine][1] + .8, 2.2);
+    beam.setAttribute('x1', top[0]); beam.setAttribute('y1', top[1]); beam.setAttribute('x2', dest[0]); beam.setAttribute('y2', dest[1]);
+    setTimeout(function () { beam.classList.add('on'); S.sound.play('whoosh'); }, 700);
+    setTimeout(function () {
+      target.classList.add('gold', 'target');
+      phase = 'final'; stops(ORDER.length);
+      $('#chap').textContent = 'المحطة ٧ من ٧';
+      $('#cname').textContent = m.committee;
+      $('#line').textContent = G('وجدها البرج! النجم هنا.', 'وجده البرج! النجم هنا.');
+      $('#hintText').textContent = G('المسي المبنى الذهبي', 'المس المبنى الذهبي');
+      droneTo(screenOf(target));
+      speak(G('هنا تسكن نجمتنا!', 'هنا يسكن نجمنا!'), 2600);
+    }, 2300);
+  }
+
+  function openStar(b) {
+    phase = 'done';
+    b.classList.remove('target'); b.classList.add('open', 'lit');
+    finale(b);
+  }
+  function finale(b) {
+    S.sound.play('thud'); setTimeout(function () { S.sound.play('reveal'); }, 300); S.buzz([60, 40, 120]);
+    var p = b ? screenOf(b) : screenOf($('#tower'));
+    setTimeout(function () { S.burst(p.x, p.y - 40, 120, { speed: 12, lift: 5, colors: ['#fff8ea', '#e9dcc3', '#c9b28a', '#5fb0bd', '#ffffff'] }); }, 600);
+    speak(G('ألف مبروك يا ' + m.first + '!', 'ألف مبروك يا ' + m.first + '!'), 4000);
+    // zoom the camera toward the building
+    world.classList.add('final');
+    if (b) {
+      // frame the building in the top part of the screen, above the reveal panel
+      var c = iso(LOTS[mine][0] + .8, LOTS[mine][1] + .8, 1.5), aspect = innerHeight / innerWidth;
+      var w = aspect > 1 ? 330 : 520, h = w * aspect;
+      var from = (world.getAttribute('viewBox') || '-400 -250 800 720').split(' ').map(Number);
+      animateViewBox(from, [c[0] - w / 2, c[1] - h * (aspect > 1 ? .3 : .38), w, h], 1600);
+    }
+    setTimeout(function () { $('#tour').hidden = true; $('#reveal').hidden = false; }, 1800);
+  }
+  function animateViewBox(a, z, ms) {
+    var t0 = performance.now();
+    (function f(t) { var k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3); world.setAttribute('viewBox', a.map(function (v, i) { return (v + (z[i] - v) * e).toFixed(1); }).join(' ')); if (k < 1) requestAnimationFrame(f); else droneTo({ x: innerWidth * .8, y: innerHeight * .15 }); })(t0);
+  }
+
+  $('#startBtn').addEventListener('click', function () {
+    S.sound.unlock(); S.sound.startMusic(); S.sound.play('open');
+    $('#intro').hidden = true; $('#tour').hidden = false;
+    goStop(0);
+  });
+  addEventListener('resize', function () { if (step >= 0 && phase !== 'done') { var t = world.querySelector('.target'); if (t) droneTo(screenOf(t)); } });
+  if (/[?&]debug\b/.test(location.search)) window.__go = function () { var t = world.querySelector('.bld.target') || ($('#tower').classList.contains('target') ? $('#tower') : null); if (t) t.dispatchEvent(new MouseEvent('click', { bubbles: true })); };
+  $('#againBtn').addEventListener('click', function () { location.reload(); });
+
+  /* ---------- share card: the island itself ---------- */
+  function buildCard() {
+    return S.fontsReady(['900 80px Alexandria', '400 40px Alexandria']).then(function () {
+      var clone = world.cloneNode(true);
+      clone.setAttribute('viewBox', '-400 -250 800 720'); clone.setAttribute('xmlns', NS); clone.setAttribute('width', '1000'); clone.setAttribute('height', '900');
+      S.$$('.lbl', clone).forEach(function (l) { l.remove(); });
+      S.$$('.bld', clone).forEach(function (b) { b.classList.remove('target'); });
+      var css = '.ring{display:none}.bld.lit .win,.bld.gold .win{fill:#e9dcc3}.flag{display:none}.bld.lit .flag{display:inline}.hero{display:none}.bld.open .hero{display:inline}.bld.open .roof{transform:translate(-30px,-140px) rotate(-25deg)}.beam{stroke-dasharray:none}.boat,.cloud{display:none}';
+      clone.insertAdjacentHTML('afterbegin', '<style>' + css + '</style>');
+      return new Promise(function (res) { var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(clone)); });
+    }).then(function (im) {
+      var W = 1080, H = 1920, c = document.createElement('canvas'); c.width = W; c.height = H; var x = c.getContext('2d');
+      var bg = x.createRadialGradient(540, 620, 50, 540, 700, 1100); bg.addColorStop(0, '#1d5560'); bg.addColorStop(1, '#0c272c'); x.fillStyle = bg; x.fillRect(0, 0, W, H);
+      if (im) x.drawImage(im, 40, 120, 1000, 900);
+      x.direction = 'rtl'; x.textAlign = 'center';
+      var fs = S.fitText(x, m.name, 960, 110, '900', 'Alexandria');
+      x.fillStyle = '#fff'; x.font = '900 ' + fs + 'px Alexandria'; x.fillText(m.name, 540, 1200);
+      x.fillStyle = '#c9b28a'; x.font = '800 56px Alexandria'; x.fillText(m.title, 540, 1295);
+      x.fillStyle = '#cfe5e8'; x.font = '400 40px Alexandria'; S.wrapLines(x, m.committee, 900).forEach(function (l, j) { x.fillText(l, 540, 1370 + j * 54); });
+      x.fillStyle = '#a9c9cd'; x.font = '400 34px Alexandria'; x.fillText('جزيرة ' + S.CONFIG.club + ' · ' + S.CONFIG.month + ' ' + S.CONFIG.year, 540, 1600);
+      x.fillStyle = '#e9dcc3'; x.font = '600 36px Alexandria'; x.fillText(S.CONFIG.slogan, 540, 1720);
+      return c;
+    });
+  }
+  $('#saveBtn').addEventListener('click', function () { S.sound.play('blip'); buildCard().then(function (c) { return S.saveCanvas(c); }); });
+  $('#shareBtn').addEventListener('click', function () { S.sound.play('blip'); buildCard().then(function (c) { return S.shareCanvas(c); }); });
+})();
+</script>
+</body>
+</html>

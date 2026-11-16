@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>تقرير الماسة</title>
+<meta name="theme-color" content="#0c272c">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;600;800&family=Aref+Ruqaa:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/core.css">
+<style>
+/* Concept B — a jeweler's lab. Open the case, inspect the stone with a loupe,
+   and a grading report prints out. Layout: a single centered bench, scenes swap in place. */
+html, body { height: auto; }
+body {
+  min-height: 100%;
+  background:
+    radial-gradient(70% 50% at 50% 38%, rgba(53, 139, 154, .35), transparent 70%),
+    linear-gradient(180deg, #0f3238 0%, var(--abyss) 60%);
+  background-attachment: fixed;
+}
+.bench {
+  min-height: 100svh;
+  display: grid; grid-template-rows: auto 1fr auto; justify-items: center;
+  padding: calc(76px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  gap: 18px;
+}
+.top {
+  position: fixed; z-index: 20; top: 0; inset-inline: 0;
+  padding: calc(22px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 0 max(70px, env(safe-area-inset-left, 0px));
+  display: flex; justify-content: space-between; align-items: center; pointer-events: none;
+  font-size: .82rem; color: var(--ink-2);
+}
+.top .steps { display: flex; gap: 6px; direction: rtl; }
+.top .steps i { width: 26px; height: 3px; border-radius: 2px; background: rgba(207, 229, 232, .18); transition: background-color .4s; }
+.top .steps i.on { background: var(--taupe-hi); }
+
+.scene { width: 100%; max-width: 520px; display: grid; justify-items: center; align-content: center; gap: 18px; text-align: center; }
+.scene[hidden] { display: none !important; }
+.scene.enter { animation: rise .8s var(--ease-out) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+h1 { margin: 0; font-weight: 800; font-size: clamp(1.9rem, 8vw, 3rem); line-height: 1.2; color: var(--white); text-wrap: balance; }
+.lead { margin: 0; max-width: 34ch; color: var(--ink-2); font-size: clamp(.98rem, 3.8vw, 1.1rem); text-wrap: pretty; }
+
+/* ---------- the case ---------- */
+.case { position: relative; width: min(74vw, 300px); aspect-ratio: 1.25; perspective: 900px; margin-top: 30px; }
+.case__base {
+  position: absolute; inset: 38% 0 0; border-radius: 10px 10px 16px 16px;
+  background: linear-gradient(180deg, #1d5560, #123a41 60%, #0b2428);
+  box-shadow: 0 30px 40px rgba(0, 0, 0, .5), inset 0 2px 0 rgba(255, 255, 255, .08);
+}
+.case__base::before { /* velvet cushion */
+  content: ""; position: absolute; inset: 10% 8% 26%; border-radius: 50% / 40%;
+  background: radial-gradient(60% 70% at 50% 35%, #2f7480, #174a52 70%, #0f3238);
+  box-shadow: inset 0 8px 16px rgba(0, 0, 0, .45);
+}
+.case__trim { position: absolute; inset-inline: 0; top: 38%; height: 7px; background: linear-gradient(90deg, #7b6845, #c9b28a 30%, #ead9b6 50%, #c9b28a 70%, #7b6845); border-radius: 3px; z-index: 3; }
+.case__lid {
+  position: absolute; inset: 0 0 62%; border-radius: 16px 16px 6px 6px; z-index: 4;
+  background: linear-gradient(180deg, #2a6973, #17474f);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .12), 0 -2px 0 rgba(0, 0, 0, .2);
+  transform-origin: 50% 100%; transition: transform 1.2s cubic-bezier(.3, 1.4, .5, 1);
+  display: grid; place-items: center;
+}
+.case__lid svg { width: 26%; opacity: .55; }
+.case.open .case__lid { transform: translateY(-6%) rotateX(68deg); filter: brightness(1.25); }
+.case__gem {
+  position: absolute; left: 50%; top: 46%; width: 46%; translate: -50% -50%; z-index: 2;
+  opacity: 0; transition: opacity .6s .5s, transform 1.3s .5s var(--ease-out);
+}
+.case.open .case__gem { opacity: 1; transform: translateY(-34%); }
+.case__glow { position: absolute; left: 50%; top: 30%; width: 120%; aspect-ratio: 1; translate: -50% -50%; z-index: 1; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(207, 229, 232, .45), transparent); opacity: 0; transition: opacity 1.4s .6s; pointer-events: none; }
+.case.open .case__glow { opacity: 1; }
+
+/* ---------- mascot: فاحص the owl ---------- */
+.owl { position: relative; width: 96px; height: 104px; flex: none; }
+.owl svg { width: 100%; height: 100%; overflow: visible; }
+.owl .lids { animation: blink 5s infinite; transform-origin: 50% 44%; }
+@keyframes blink { 0%, 93%, 100% { transform: scaleY(0); } 96% { transform: scaleY(1); } }
+.owl .loupe-arm { transform-origin: 66px 44px; transition: transform .5s var(--ease-out); }
+.owl.peer .loupe-arm { transform: rotate(-14deg) translate(-2px, -2px); }
+.owl .body { animation: breathe 3.8s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes breathe { 50% { transform: scaleY(1.025); } }
+.guide { display: flex; align-items: flex-end; gap: 10px; direction: rtl; max-width: 420px; }
+.say {
+  position: relative; margin: 0 0 30px; text-align: start;
+  background: var(--sand); color: var(--abyss); font-weight: 600; font-size: .92rem; line-height: 1.55;
+  padding: .7em 1em; border-radius: 16px 16px 4px 16px;
+  min-height: 2.6em; transition: opacity .3s;
+}
+.say.swap { opacity: 0; }
+
+/* ---------- inspection ---------- */
+.lab { position: relative; width: min(80vw, 340px); aspect-ratio: 200 / 160; margin: 40px 0 44px; touch-action: none; user-select: none; }
+.lab__gem { width: 100%; height: 100%; display: block; filter: drop-shadow(0 18px 28px rgba(0, 0, 0, .45)); }
+.spot {
+  position: absolute; width: 44px; height: 44px; translate: -50% -50%; border: 0; padding: 0; background: transparent; cursor: pointer; border-radius: 50%;
+}
+.spot::before { content: ""; position: absolute; inset: 15px; border-radius: 50%; background: var(--taupe-hi); box-shadow: 0 0 0 0 rgba(201, 178, 138, .7); animation: pulse 1.6s infinite; }
+@keyframes pulse { to { box-shadow: 0 0 0 14px rgba(201, 178, 138, 0); } }
+.spot.found::before { animation: none; background: var(--teal); box-shadow: 0 0 0 3px #fff; }
+.spot.found { cursor: default; }
+.loupe {
+  position: absolute; z-index: 5; width: 132px; height: 132px; left: 0; top: 0; margin: -66px 0 0 -66px;
+  border-radius: 50%; overflow: hidden; cursor: grab; touch-action: none;
+  box-shadow: 0 0 0 7px #c9b28a, 0 0 0 9px #7b6845, 0 18px 30px rgba(0, 0, 0, .5);
+  background: #0f3238;
+}
+.loupe:active { cursor: grabbing; }
+.loupe__view { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.loupe__view svg { display: block; }
+.loupe::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, .35), transparent 40%); pointer-events: none; }
+.loupe__handle { position: absolute; z-index: 4; width: 16px; height: 70px; border-radius: 8px; background: linear-gradient(90deg, #5e4f33, #9f895c, #5e4f33); transform-origin: 50% 0; pointer-events: none; }
+.readout { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; max-width: 420px; }
+.readout div { padding: 10px 6px; border-radius: 8px; background: rgba(207, 229, 232, .06); box-shadow: inset 0 0 0 1px var(--line); transition: background-color .4s, box-shadow .4s; }
+.readout b { display: block; font-size: .95rem; color: var(--ink-2); transition: color .4s; }
+.readout span { display: block; font-size: .72rem; color: rgba(169, 201, 205, .6); }
+.readout div.on { background: rgba(201, 178, 138, .14); box-shadow: inset 0 0 0 1px rgba(201, 178, 138, .5); }
+.readout div.on b { color: var(--taupe-hi); }
+.readout div.on span { color: var(--sand); }
+.auto { font-size: .86rem; color: var(--ink-2); background: none; border: 0; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; padding: 8px; }
+
+/* ---------- printer & certificate ---------- */
+.printer { position: relative; width: 100%; max-width: 470px; padding-top: 18px; }
+.printer__slot { position: relative; z-index: 3; height: 18px; margin: 0 6px; border-radius: 9px; background: linear-gradient(180deg, #06171a, #0f3238); box-shadow: inset 0 3px 6px rgba(0, 0, 0, .7), 0 1px 0 rgba(255, 255, 255, .08); }
+.printer__feed { position: relative; z-index: 2; margin-top: -9px; overflow: hidden; clip-path: inset(0 -40px -60px -40px); }
+.printer__feed .cert { transform: translateY(-101%); }
+.printing .printer__feed .cert { transition: transform 3.4s cubic-bezier(.45, .05, .35, 1); transform: translateY(0); }
+.done-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 6px; }
+.done-actions .btn { min-height: 48px; padding: 0 1.3em; font-size: .95rem; }
+.final-title { margin: 0; font-weight: 800; font-size: clamp(1.4rem, 6vw, 2rem); color: var(--white); }
+.final-title b { color: var(--taupe-hi); font-weight: 800; }
+</style>
+</head>
+<body>
+<header class="top"><span>نجوم الشهر · مختبر الماس</span><span class="steps" aria-hidden="true"><i class="on"></i><i></i><i></i></span></header>
+
+<main class="bench">
+  <div class="guide" id="guide">
+    <div class="owl" id="owl" aria-hidden="true">
+      <svg viewBox="0 0 96 104">
+        <g class="body">
+          <path d="M48 6 C30 6 14 18 14 46 C14 74 26 96 48 96 C70 96 82 74 82 46 C82 18 66 6 48 6Z" fill="#2a636d" stroke="#0c272c" stroke-width="3"/>
+          <path d="M20 22 L26 4 L36 14Z M76 22 L70 4 L60 14Z" fill="#2a636d" stroke="#0c272c" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M48 52 C34 52 26 64 28 80 C30 92 40 96 48 96 C56 96 66 92 68 80 C70 64 62 52 48 52Z" fill="#cfe5e8"/>
+          <path d="M38 70 l4 4 4 -4 M50 70 l4 4 4 -4 M44 80 l4 4 4 -4" fill="none" stroke="#358b9a" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="32" cy="42" r="13" fill="#fff" stroke="#0c272c" stroke-width="3"/>
+          <circle cx="64" cy="42" r="13" fill="#fff" stroke="#0c272c" stroke-width="3"/>
+          <circle cx="33" cy="43" r="6" fill="#0c272c"/><circle cx="35" cy="41" r="2" fill="#fff"/>
+          <circle cx="63" cy="43" r="7.5" fill="#0c272c"/><circle cx="65.5" cy="40.5" r="2.4" fill="#fff"/>
+          <g class="lids"><rect x="18" y="28" width="28" height="15" fill="#2a636d"/><rect x="50" y="28" width="28" height="15" fill="#2a636d"/></g>
+          <path d="M44 52 L48 60 L52 52Z" fill="#c9b28a" stroke="#0c272c" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M34 96 v5 M40 96 v5 M56 96 v5 M62 96 v5" stroke="#9f895c" stroke-width="3" stroke-linecap="round"/>
+        </g>
+        <g class="loupe-arm"><circle cx="64" cy="42" r="15.5" fill="none" stroke="#c9b28a" stroke-width="4"/><circle cx="64" cy="42" r="15.5" fill="none" stroke="#7b6845" stroke-width="1"/><path d="M78 50 L90 58" stroke="#7b6845" stroke-width="4" stroke-linecap="round"/></g>
+      </svg>
+    </div>
+    <p class="say" id="say" aria-live="polite"></p>
+  </div>
+
+  <!-- 1. the case -->
+  <section class="scene" id="sceneCase">
+    <h1 id="caseTitle">وصلتنا ماسة للتقييم</h1>
+    <div class="case" id="case" aria-hidden="true">
+      <div class="case__glow"></div>
+      <div class="case__base"></div>
+      <div class="case__gem" id="caseGem"></div>
+      <div class="case__trim"></div>
+      <div class="case__lid" id="caseLid"></div>
+    </div>
+    <button class="btn btn--gold" id="openBtn" type="button"></button>
+  </section>
+
+  <!-- 2. inspection -->
+  <section class="scene" id="sceneLab" hidden>
+    <p class="lead" id="labLead"></p>
+    <div class="lab" id="lab">
+      <div class="lab__gem" id="labGem"></div>
+      <div class="loupe" id="loupe" role="img" aria-label="عدسة الفحص"><div class="loupe__view" id="loupeView"></div></div>
+    </div>
+    <div class="readout" id="readout"></div>
+    <button class="auto" id="autoBtn" type="button">افحص تلقائيًا</button>
+  </section>
+
+  <!-- 3. report -->
+  <section class="scene" id="sceneCert" hidden>
+    <p class="final-title" id="finalTitle"></p>
+    <div class="printer" id="printer"><div class="printer__slot"></div><div class="printer__feed" id="feed"></div></div>
+    <div class="done-actions" id="actions" hidden>
+      <button class="btn btn--gold" id="saveBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></svg><span id="saveLabel"></span></button>
+      <button class="btn btn--ghost" id="shareBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/></svg>مشاركة</button>
+      <button class="btn btn--ghost" id="againBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5"/></svg>من جديد</button>
+    </div>
+  </section>
+  <div></div>
+</main>
+
+<script src="assets/core.js"></script>
+<script src="assets/cert.js"></script>
+<script>
+(function () {
+  var S = window.SOTM, m = S.member, G = S.G, $ = S.$;
+  S.sound.mountButton();
+  var say = $('#say'), owl = $('#owl');
+  function speak(t) { say.classList.add('swap'); setTimeout(function () { say.textContent = t; say.classList.remove('swap'); }, 220); }
+  function steps(n) { S.$$('.top .steps i').forEach(function (s, i) { s.classList.toggle('on', i < n); }); }
+  function swap(a, b) { a.hidden = true; b.hidden = false; b.classList.remove('enter'); void b.offsetWidth; b.classList.add('enter'); }
+
+  // copy
+  say.textContent = G('أهلًا ' + m.first + '، أنا فاحص، خبير الماس في النادي. وصلتنا ماسة نادرة باسمكِ، هل نفتح العلبة؟',
+    'أهلًا ' + m.first + '، أنا فاحص، خبير الماس في النادي. وصلتنا ماسة نادرة باسمك، هل نفتح العلبة؟');
+  $('#openBtn').textContent = G('افتحي العلبة', 'افتح العلبة');
+  $('#labLead').textContent = G('حرّكي العدسة فوق النقاط اللامعة لتكشفي درجات ماستكِ الأربع.', 'حرّك العدسة فوق النقاط اللامعة لتكشف درجات ماستك الأربع.');
+  $('#saveLabel').textContent = G('احفظي التقرير', 'احفظ التقرير');
+  $('#caseLid').innerHTML = S.diamondSVG('', ['#cfe5e8', '#cfe5e8', '#cfe5e8', '#cfe5e8', '#cfe5e8', '#cfe5e8', '#cfe5e8', '#cfe5e8'], '#0c272c');
+  $('#caseGem').innerHTML = S.diamondSVG('');
+
+  /* ---------- 1 → 2: open the case ---------- */
+  $('#openBtn').addEventListener('click', function () {
+    S.sound.unlock(); S.sound.startMusic(); S.sound.play('open');
+    $('#case').classList.add('open'); this.disabled = true;
+    setTimeout(function () { S.sound.play('ping', 1); var r = $('#caseGem').getBoundingClientRect(); S.burst(r.left + r.width / 2, r.top + r.height / 2, 30, { speed: 5 }); }, 900);
+    speak(G('يا لها من ماسة! دعيني أفحصها بعدستي.', 'يا لها من ماسة! دعني أفحصها بعدستي.'));
+    owl.classList.add('peer');
+    setTimeout(function () { swap($('#sceneCase'), $('#sceneLab')); steps(2); initLab(); }, 2300);
+  });
+
+  /* ---------- 2: loupe inspection ---------- */
+  var SPOTS = [[0.33, 0.27], [0.7, 0.24], [0.5, 0.5], [0.42, 0.76]]; // fraction of the gem box
+  var ZOOM = 2.6, found = 0, labReady = false;
+
+  function initLab() {
+    var lab = $('#lab'), gemBox = $('#labGem'), view = $('#loupeView'), loupe = $('#loupe');
+    var fills = ['#9fc8ce', '#d6ecee', '#b4d6da', '#c9e2e5', '#8fbcc2', '#9cc5ca', '#e6f3f4', '#b1d2d6'];
+    gemBox.innerHTML = S.diamondSVG('lab__gem', fills);
+    view.innerHTML = S.diamondSVG('', fills);
+    var ro = $('#readout');
+    ro.innerHTML = Cert.GRADES.map(function (g) { return '<div><b>' + g.c + '</b><span>' + g.v + '</span></div>'; }).join('');
+    SPOTS.forEach(function (s, i) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'spot';
+      b.style.left = (s[0] * 100) + '%'; b.style.top = (s[1] * 100) + '%';
+      b.setAttribute('aria-label', 'افحص ' + Cert.GRADES[i].c);
+      b.addEventListener('click', function () { moveLoupeTo(s[0] * lab.clientWidth, s[1] * lab.clientHeight, true); reveal(i); });
+      lab.appendChild(b);
+    });
+    var W, H;
+    function size() { W = lab.clientWidth; H = lab.clientHeight; var sv = view.querySelector('svg'); sv.style.width = (W * ZOOM) + 'px'; sv.style.height = (H * ZOOM) + 'px'; }
+    size(); addEventListener('resize', size);
+    var lx = W * 0.14, ly = H * 0.82;
+    function place(x, y) {
+      lx = Math.max(0, Math.min(W, x)); ly = Math.max(-30, Math.min(H + 40, y));
+      loupe.style.transform = 'translate(' + lx + 'px,' + ly + 'px)';
+      view.style.transform = 'translate(' + (66 - lx * ZOOM) + 'px,' + (66 - ly * ZOOM) + 'px)';
+      SPOTS.forEach(function (s, i) { if (Math.hypot(s[0] * W - lx, s[1] * H - ly) < 22) reveal(i); });
+    }
+    window.moveLoupeTo = function (x, y, anim) {
+      if (!anim) return place(x, y);
+      var sx = lx, sy = ly, t0 = performance.now();
+      (function step(t) { var k = Math.min(1, (t - t0) / 450), e = 1 - Math.pow(1 - k, 3); place(sx + (x - sx) * e, sy + (y - sy) * e); if (k < 1) requestAnimationFrame(step); })(t0);
+    };
+    place(lx, ly);
+    var drag = null;
+    loupe.addEventListener('pointerdown', function (e) { drag = { ox: e.clientX - lx, oy: e.clientY - ly }; loupe.setPointerCapture(e.pointerId); S.sound.unlock(); });
+    loupe.addEventListener('pointermove', function (e) { if (drag) place(e.clientX - drag.ox, e.clientY - drag.oy); });
+    loupe.addEventListener('pointerup', function () { drag = null; });
+    lab.addEventListener('pointerdown', function (e) {
+      if (e.target !== lab && !e.target.classList.contains('lab__gem') && e.target.tagName !== 'polygon' && e.target.tagName !== 'svg') return;
+      var r = lab.getBoundingClientRect(); moveLoupeTo(e.clientX - r.left, e.clientY - r.top, true);
+    });
+    speak(G('العدسة جاهزة. ابحثي عن النقاط اللامعة.', 'العدسة جاهزة. ابحث عن النقاط اللامعة.'));
+    labReady = true;
+  }
+
+  var LINES = [
+    'القَطع: ممتاز. هذا إبداع لا يُقلَّد.',
+    'النقاء: بلا شوائب. عطاءٌ صافٍ تمامًا.',
+    'اللون: درجة D، الأنقى. هذا شغفٌ حقيقي.',
+    'الوزن… لا أستطيع قياسه! أثرٌ أكبر من موازيني.'
+  ];
+  var done = {};
+  function reveal(i) {
+    if (done[i] || !labReady) return;
+    done[i] = true; found++;
+    S.$$('.spot')[i].classList.add('found');
+    S.$$('#readout div')[i].classList.add('on');
+    S.sound.play('ping', 0.9 + i * 0.15);
+    var r = S.$$('.spot')[i].getBoundingClientRect(); S.burst(r.left + 22, r.top + 22, 16, { speed: 4, size: 5 });
+    speak(LINES[i]);
+    if (found === 4) setTimeout(printReport, 1900);
+  }
+  $('#autoBtn').addEventListener('click', function () {
+    var lab = $('#lab'), k = 0;
+    (function next() {
+      while (k < 4 && done[k]) k++;
+      if (k >= 4) return;
+      var s = SPOTS[k]; moveLoupeTo(s[0] * lab.clientWidth, s[1] * lab.clientHeight, true);
+      setTimeout(function () { reveal(k); k++; setTimeout(next, 900); }, 480);
+    })();
+  });
+
+  /* ---------- 3: print the report ---------- */
+  var cert = null;
+  function printReport() {
+    swap($('#sceneLab'), $('#sceneCert')); steps(3);
+    $('#finalTitle').innerHTML = G('ماستكِ معتمدة يا <b>' + m.first + '</b>', 'ماستك معتمدة يا <b>' + m.first + '</b>');
+    speak('جارٍ طباعة التقرير الرسمي…');
+    cert = Cert.mount($('#feed'));
+    owl.classList.remove('peer');
+    var pr = $('#printer');
+    setTimeout(function () {
+      pr.classList.add('printing');
+      var ticks = setInterval(function () { S.sound.play('tick'); }, 110);
+      setTimeout(function () { clearInterval(ticks); }, 3300);
+      for (var i = 0; i < 4; i++) (function (i) { setTimeout(function () { cert.fillRow(i); }, 1500 + i * 450); })(i);
+      setTimeout(function () {
+        cert.el.querySelector('.cert__seal').scrollIntoView({ behavior: S.reducedMotion() ? 'auto' : 'smooth', block: 'center' });
+      }, 3300);
+      setTimeout(function () {
+        cert.stamp(); S.sound.play('stamp');
+        setTimeout(function () {
+          var s = cert.el.querySelector('.cert__seal').getBoundingClientRect();
+          S.burst(s.left + s.width / 2, s.top + s.height / 2, 50, { colors: ['#c9b28a', '#ead9b6', '#9f895c', '#ffffff'], speed: 8 });
+          S.sound.play('reveal');
+          speak('الماسة معتمدة رسميًا! ألف مبروك يا ' + m.title + '.');
+          $('#actions').hidden = false; $('#actions').classList.add('scene', 'enter');
+        }, 350);
+      }, 4200);
+    }, 500);
+  }
+
+  $('#againBtn').addEventListener('click', function () { location.reload(); });
+  $('#saveBtn').addEventListener('click', function () { S.sound.play('blip'); Cert.drawCard().then(function (c) { return S.saveCanvas(c, 'تقرير-الماسة-' + m.slug + '.png'); }); });
+  $('#shareBtn').addEventListener('click', function () { S.sound.play('blip'); Cert.drawCard().then(function (c) { return S.shareCanvas(c); }); });
+})();
+</script>
+</body>
+</html>

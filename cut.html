@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>صقل الماسة</title>
+<meta name="theme-color" content="#0c272c">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;600;800&display=swap">
+<link rel="stylesheet" href="assets/core.css">
+<style>
+/* Concept A — the visitor cuts a rough stone into the club's diamond.
+   Layout: one full-bleed stage; the gem owns the center, copy sits in the lower third. */
+body { height: 100%; overflow: hidden; }
+.stage {
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(60% 45% at 50% 42%, rgba(53, 139, 154, .45), transparent 70%),
+    radial-gradient(120% 80% at 50% 110%, rgba(42, 99, 109, .55), transparent 60%),
+    var(--abyss);
+}
+.stage::before { /* fine dust of light */
+  content: ""; position: absolute; inset: 0; opacity: .55; pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 82% 12%, #cfe5e8 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 66% 30%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 24% 64%, #cfe5e8 50%, transparent 51%),
+    radial-gradient(1px 1px at 90% 70%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 40% 8%, #e9dcc3 50%, transparent 51%),
+    radial-gradient(1px 1px at 8% 86%, #fff 50%, transparent 51%);
+  animation: twinkle 6s ease-in-out infinite alternate;
+}
+@keyframes twinkle { to { opacity: .25; } }
+.gem-wrap { position: absolute; inset: 0; }
+.gem-canvas { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+.gem-canvas:active { cursor: grabbing; }
+
+/* light rays behind the finished diamond */
+.rays {
+  position: absolute; left: 50%; top: 27%; width: 160vmax; height: 160vmax; translate: -50% -50%;
+  background: repeating-conic-gradient(from 0deg, rgba(233, 220, 195, .10) 0 4deg, transparent 4deg 16deg);
+  -webkit-mask: radial-gradient(closest-side, #000 0%, transparent 62%); mask: radial-gradient(closest-side, #000 0%, transparent 62%);
+  opacity: 0; scale: .6; transition: opacity 1.6s var(--ease-out), scale 2.4s var(--ease-out);
+  animation: spin 60s linear infinite; pointer-events: none;
+}
+@keyframes spin { to { rotate: 360deg; } }
+.is-done .rays { opacity: 1; scale: 1; }
+
+.top {
+  position: fixed; z-index: 20; top: 0; inset-inline: 0;
+  padding: calc(18px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 0 max(70px, env(safe-area-inset-left, 0px));
+  display: flex; justify-content: space-between; align-items: center; pointer-events: none;
+}
+.mark { font-size: .82rem; color: var(--ink-2); display: flex; align-items: center; gap: .5em; white-space: nowrap; }
+@media (max-width: 420px) { .mark .club { display: none; } }
+.mark svg { width: 22px; height: 18px; }
+
+/* progress: five facets */
+.facets { display: flex; gap: 6px; direction: rtl; opacity: 0; transition: opacity .5s; }
+.is-cutting .facets, .is-done .facets { opacity: 1; }
+.facet { width: 18px; height: 22px; background: rgba(207, 229, 232, .14); clip-path: polygon(50% 0, 100% 35%, 50% 100%, 0 35%); transition: background-color .4s, transform .5s var(--ease-out); }
+.facet.on { background: var(--taupe-hi); transform: scale(1.15); }
+
+/* copy panels */
+.panel {
+  position: fixed; z-index: 10; inset-inline: 0; bottom: 0;
+  padding: 0 max(20px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+  display: grid; justify-items: center; text-align: center; gap: 14px;
+  transition: opacity .6s var(--ease-out), transform .8s var(--ease-out);
+}
+.panel[hidden] { display: none !important; }
+.panel.leave { opacity: 0; transform: translateY(24px); pointer-events: none; }
+.panel.enter { animation: rise .9s var(--ease-out) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
+.intro h1 { margin: 0; font-weight: 800; font-size: clamp(2rem, 8.4vw, 3.4rem); line-height: 1.15; text-wrap: balance; color: var(--white); }
+.intro p { margin: 0; max-width: 32ch; color: var(--ink-2); font-size: clamp(.98rem, 3.8vw, 1.12rem); text-wrap: pretty; }
+
+.cutting { gap: 8px; padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+.word { font-weight: 800; font-size: clamp(2.2rem, 11vw, 4rem); line-height: 1.1; color: var(--taupe-hi); min-height: 1.2em; }
+.word.pop { animation: pop .9s var(--ease-out); }
+@keyframes pop { 0% { opacity: 0; transform: translateY(16px) scale(.9); filter: blur(6px); } 100% { opacity: 1; transform: none; filter: none; } }
+.hint { margin: 0; color: var(--ink-2); font-size: .95rem; display: flex; align-items: center; gap: .5em; }
+.hint .tapdot { width: 10px; height: 10px; border-radius: 50%; background: var(--mist); animation: ping 1.4s var(--ease-out) infinite; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(207, 229, 232, .6); } 100% { box-shadow: 0 0 0 14px rgba(207, 229, 232, 0); } }
+.cut-btn { margin-top: 6px; }
+
+/* reveal */
+.reveal { gap: 10px; }
+.reveal .name { margin: 0; font-weight: 800; font-size: clamp(2.3rem, 10.5vw, 4.6rem); line-height: 1.12; color: var(--white); text-wrap: balance; }
+.reveal .name .w { opacity: 0; transform: translateY(.4em); filter: blur(8px); }
+.is-done .reveal .name .w { animation: word 1s var(--ease-out) forwards; animation-delay: calc(var(--i) * .22s + .3s); }
+@keyframes word { to { opacity: 1; transform: none; filter: none; } }
+.role { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .35em .7em; font-size: clamp(1rem, 4vw, 1.2rem); }
+.role b { color: var(--taupe-hi); font-weight: 600; }
+.role span { color: var(--ink-2); }
+.role i { width: 6px; height: 8px; background: var(--teal); clip-path: polygon(50% 0, 100% 40%, 50% 100%, 0 40%); }
+.msg { margin: 4px 0 0; max-width: 34ch; color: var(--ink); font-weight: 300; font-size: clamp(.98rem, 3.7vw, 1.1rem); text-wrap: pretty; }
+.slogan { margin: 2px 0 6px; font-size: .82rem; color: var(--taupe-hi); letter-spacing: .02em; }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.actions .btn { min-height: 48px; padding: 0 1.3em; font-size: .95rem; }
+.reveal > * { opacity: 0; }
+.is-done .reveal > * { animation: rise .9s var(--ease-out) both; }
+.is-done .reveal > .role { animation-delay: 1.1s; }
+.is-done .reveal > .msg { animation-delay: 1.35s; }
+.is-done .reveal > .slogan { animation-delay: 1.55s; }
+.is-done .reveal > .actions { animation-delay: 1.75s; }
+.is-done .reveal > .name { opacity: 1; animation: none; }
+
+/* mascot: شرارة, a living spark */
+.spark {
+  position: fixed; z-index: 15; width: 74px; height: 74px;
+  inset-inline-start: calc(50% + 92px); top: 22%;
+  transition: inset-inline-start 1s var(--ease-out), top 1s var(--ease-out), transform .3s var(--ease-out);
+  filter: drop-shadow(0 6px 18px rgba(207, 229, 232, .35));
+}
+.spark svg { width: 100%; height: 100%; animation: bob 3.2s ease-in-out infinite; overflow: visible; }
+@keyframes bob { 50% { transform: translateY(-8px) rotate(6deg); } }
+.spark .lid { transform-origin: center; animation: blink 4.5s infinite; }
+@keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+.spark.strike { transform: translate(var(--sx, 40px), 34px) rotate(-28deg) scale(1.1); }
+.bubble {
+  position: absolute; bottom: 88%; inset-inline-start: 40%;
+  width: max-content; max-width: 190px;
+  background: var(--sand); color: var(--abyss); font-size: .86rem; font-weight: 600; line-height: 1.5;
+  padding: .55em .9em; border-radius: 14px 14px 14px 4px;
+  opacity: 0; transform: translateY(6px) scale(.96); transform-origin: bottom left;
+  transition: opacity .35s, transform .5s var(--ease-out);
+  pointer-events: none;
+}
+.bubble.show { opacity: 1; transform: none; }
+.is-done .spark { inset-inline-start: calc(50% + 70px); top: 12%; }
+@media (max-width: 520px) {
+  .spark { width: 58px; height: 58px; inset-inline-start: calc(50% + 66px); top: 19%; }
+  .is-done .spark { inset-inline-start: calc(50% + 54px); top: 10%; }
+  .bubble { max-width: 150px; font-size: .8rem; inset-inline-start: auto; inset-inline-end: 30%; border-radius: 14px 14px 4px 14px; transform-origin: bottom right; }
+}
+
+.fallback-gem { position: absolute; left: 50%; top: 40%; width: min(56vw, 300px); translate: -50% -50%; filter: grayscale(var(--g, 1)) brightness(var(--b, .75)); transition: filter .6s, scale .3s var(--ease-out); cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="rays" aria-hidden="true"></div>
+  <div class="gem-wrap" id="gemWrap"></div>
+</div>
+
+<header class="top">
+  <div class="mark"><span id="clubMark"></span><span>نجوم الشهر<span class="club"> · نادي الحاسبات</span></span></div>
+  <div class="facets" aria-hidden="true"><i class="facet"></i><i class="facet"></i><i class="facet"></i><i class="facet"></i><i class="facet"></i></div>
+</header>
+
+<div class="spark" id="spark" aria-hidden="true">
+  <div class="bubble" id="bubble"></div>
+  <svg viewBox="0 0 100 100">
+    <defs>
+      <linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#bfe3e8"/></linearGradient>
+    </defs>
+    <path d="M50 4 C55 32 68 45 96 50 C68 55 55 68 50 96 C45 68 32 55 4 50 C32 45 45 32 50 4Z" fill="url(#sg)" stroke="#0c272c" stroke-width="3" stroke-linejoin="round"/>
+    <g class="lid"><ellipse cx="42" cy="48" rx="3.6" ry="5" fill="#0c272c"/><ellipse cx="58" cy="48" rx="3.6" ry="5" fill="#0c272c"/></g>
+    <circle cx="43.2" cy="46.4" r="1.2" fill="#fff"/><circle cx="59.2" cy="46.4" r="1.2" fill="#fff"/>
+    <path d="M45 57 Q50 61 55 57" fill="none" stroke="#0c272c" stroke-width="2.6" stroke-linecap="round"/>
+    <ellipse cx="36" cy="56" rx="4" ry="2.4" fill="#9f895c" opacity=".55"/><ellipse cx="64" cy="56" rx="4" ry="2.4" fill="#9f895c" opacity=".55"/>
+  </svg>
+</div>
+
+<section class="panel intro" id="intro">
+  <h1 id="introTitle">الماس لا يولد لامعًا</h1>
+  <p id="introText"></p>
+  <button class="btn btn--primary" id="startBtn" type="button"></button>
+</section>
+
+<section class="panel cutting" id="cutting" hidden>
+  <div class="word" id="word" aria-live="polite"></div>
+  <p class="hint" id="hint"><span class="tapdot"></span><span id="hintText"></span></p>
+  <button class="btn btn--ghost cut-btn" id="cutBtn" type="button"></button>
+</section>
+
+<section class="panel reveal" id="reveal" hidden>
+  <h1 class="name" id="name"></h1>
+  <div class="role"><b id="title"></b><i></i><span id="committee"></span></div>
+  <p class="msg" id="msg"></p>
+  <p class="slogan" id="slogan"></p>
+  <div class="actions">
+    <button class="btn btn--gold" id="saveBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></svg><span id="saveLabel"></span></button>
+    <button class="btn btn--ghost" id="shareBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/></svg>مشاركة</button>
+    <button class="btn btn--ghost" id="againBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5"/></svg>من جديد</button>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="assets/core.js"></script>
+<script src="assets/gem3d.js"></script>
+<script>
+(function () {
+  var S = window.SOTM, m = S.member, G = S.G, $ = S.$;
+  var WORDS = ['الشغف', 'العطاء', 'الإبداع', 'روح الفريق', 'الأثر'];
+  var ROUGH = [0.78, 0.56, 0.36, 0.17, 0];
+  var LINES = [
+    G('ضربة موفّقة! هذا الشغف.', 'ضربة موفّقة! هذا الشغف.'),
+    G('أكملي، بدأ يلمع.', 'أكمل، بدأ يلمع.'),
+    G('هل ترين اللون؟', 'هل ترى اللون؟'),
+    'بقيت ضربة واحدة…',
+    G('ها هي ماستكِ!', 'ها هي ماستك!')
+  ];
+
+  S.$('#clubMark').innerHTML = S.diamondSVG('', null, '#cfe5e8');
+  $('#introText').textContent = G(
+    'وصلنا هذا الشهر حجرٌ خام يحمل اسمًا مميزًا. اصقليه بخمس ضربات، وسترين ما يخبّئه في داخله.',
+    'وصلنا هذا الشهر حجرٌ خام يحمل اسمًا مميزًا. اصقله بخمس ضربات، وسترى ما يخبّئه في داخله.');
+  $('#startBtn').textContent = G('ابدئي الصقل', 'ابدأ الصقل');
+  $('#hintText').textContent = G('اضغطي على الحجر', 'اضغط على الحجر');
+  $('#cutBtn').textContent = 'اصقل';
+  $('#title').textContent = m.title;
+  $('#committee').textContent = m.committee + ' · ' + S.CONFIG.month + ' ' + S.CONFIG.year;
+  $('#msg').textContent = G('لمعانكِ لم يكن صدفة. هو شغفكِ وعطاؤكِ وأثركِ في كل ما قدّمتِه هذا الشهر. شكرًا لأنكِ منّا.',
+    'لمعانك لم يكن صدفة. هو شغفك وعطاؤك وأثرك في كل ما قدّمته هذا الشهر. شكرًا لأنك منّا.');
+  $('#slogan').textContent = S.CONFIG.slogan;
+  $('#saveLabel').textContent = G('احفظي البطاقة', 'احفظ البطاقة');
+  S.splitWords($('#name'), m.name);
+  S.sound.mountButton();
+
+  var stage = $('#stage'), spark = $('#spark'), bubble = $('#bubble');
+  var gem = null, fallback = null, step = 0, busy = false;
+
+  if (window.THREE && Gem3D.supported()) {
+    gem = Gem3D.create($('#gemWrap'), { scale: 1.0, top: 0.36, fitW: 0.6, fitH: 0.4 });
+  }
+  if (!gem) {
+    $('#gemWrap').innerHTML = S.diamondSVG('fallback-gem');
+    fallback = $('.fallback-gem');
+  }
+
+  function say(text, ms) {
+    bubble.textContent = text; bubble.classList.add('show');
+    clearTimeout(say.h); if (ms) say.h = setTimeout(function () { bubble.classList.remove('show'); }, ms);
+  }
+  setTimeout(function () { say(G('أهلًا! أنا شرارة، سأصقل معكِ.', 'أهلًا! أنا شرارة، سأصقل معك.'), 4200); }, 900);
+
+  function swap(from, to) {
+    from.classList.add('leave');
+    setTimeout(function () { from.hidden = true; from.classList.remove('leave'); to.hidden = false; to.classList.add('enter'); }, 450);
+  }
+
+  $('#startBtn').addEventListener('click', function () {
+    S.sound.unlock(); S.sound.startMusic(); S.sound.play('ping', 0.75);
+    document.body.classList.add('is-cutting');
+    swap($('#intro'), $('#cutting'));
+    say(G('اضغطي على الحجر نفسه.', 'اضغط على الحجر نفسه.'), 3000);
+  });
+
+  function doCut(x, y) {
+    if (busy || step >= 5 || !document.body.classList.contains('is-cutting')) return;
+    busy = true;
+    var i = step++;
+    spark.style.setProperty('--sx', (document.dir === 'rtl' ? -60 : 60) + 'px');
+    spark.classList.add('strike');
+    setTimeout(function () { spark.classList.remove('strike'); }, 260);
+    S.sound.play('chisel'); setTimeout(function () { S.sound.play('ping', 0.8 + i * 0.12); }, 90);
+    if (gem) { gem.cut(ROUGH[i]); var c = gem.screenCenter(); S.burst(x || c.x, y || c.y, 26, { speed: 6 }); }
+    else { fallback.style.setProperty('--g', String(1 - (i + 1) / 5)); fallback.style.setProperty('--b', String(.75 + (i + 1) * .06)); var r = fallback.getBoundingClientRect(); S.burst(r.left + r.width / 2, r.top + r.height / 2, 26); }
+    var w = $('#word'); w.textContent = WORDS[i]; w.classList.remove('pop'); void w.offsetWidth; w.classList.add('pop');
+    S.$$('.facet')[i].classList.add('on');
+    say(LINES[i], 1800);
+    if (i === 0) $('#hint').style.visibility = 'hidden';
+    if (step === 5) { setTimeout(finish, 1100); } else { setTimeout(function () { busy = false; }, 420); }
+  }
+
+  if (gem) gem.onTap(function (e) { if (e.hit) doCut(e.x, e.y); });
+  if (fallback) fallback.addEventListener('click', function (e) { doCut(e.clientX, e.clientY); });
+  $('#cutBtn').addEventListener('click', function () { doCut(); });
+  addEventListener('keydown', function (e) { if ((e.key === ' ' || e.key === 'Enter') && document.activeElement === document.body) doCut(); });
+
+  function finish() {
+    if (gem) { gem.polish(); gem.setLayout({ top: 0.27, fitH: 0.3, fitW: 0.5 }); }
+    S.sound.play('whoosh'); setTimeout(function () { S.sound.play('reveal'); }, 500);
+    document.body.classList.remove('is-cutting');
+    document.body.classList.add('is-done');
+    var c = gem ? gem.screenCenter() : { x: innerWidth / 2, y: innerHeight * .4 };
+    setTimeout(function () { S.burst(c.x, c.y, 90, { speed: 11, lift: 4 }); }, 500);
+    swap($('#cutting'), $('#reveal'));
+    say(G('ألف مبروك يا ' + m.first + '!', 'ألف مبروك يا ' + m.first + '!'), 5000);
+    busy = false;
+  }
+
+  $('#againBtn').addEventListener('click', function () { location.reload(); });
+
+  /* ---------- share card 1080x1920 ---------- */
+  function buildCard() {
+    return S.fontsReady(['800 80px Alexandria', '400 40px Alexandria', '600 40px Alexandria']).then(function () {
+      var W = 1080, H = 1920, c = document.createElement('canvas'); c.width = W; c.height = H;
+      var x = c.getContext('2d');
+      var bg = x.createRadialGradient(W / 2, 640, 40, W / 2, 700, 1300);
+      bg.addColorStop(0, '#2f7480'); bg.addColorStop(.45, '#14424a'); bg.addColorStop(1, '#0c272c');
+      x.fillStyle = bg; x.fillRect(0, 0, W, H);
+      // rays
+      x.save(); x.translate(W / 2, 640); x.globalAlpha = .08; x.fillStyle = '#e9dcc3';
+      for (var r = 0; r < 24; r++) { x.rotate(Math.PI * 2 / 24); x.beginPath(); x.moveTo(0, 0); x.lineTo(-40, -1200); x.lineTo(40, -1200); x.closePath(); x.fill(); }
+      x.restore();
+      // gem
+      if (gem) { x.drawImage(gem.snapshot(1000), W / 2 - 500, 140, 1000, 1000); }
+      else S.drawDiamond(x, W / 2, 640, 560, { stroke: '#0c272c' });
+      x.direction = 'rtl'; x.textAlign = 'center'; x.fillStyle = '#ffffff';
+      var fs = S.fitText(x, m.name, 940, 112, '800', 'Alexandria');
+      x.font = '800 ' + fs + 'px Alexandria'; x.fillText(m.name, W / 2, 1290);
+      x.font = '600 52px Alexandria'; x.fillStyle = '#c9b28a'; x.fillText(m.title, W / 2, 1390);
+      x.font = '400 40px Alexandria'; x.fillStyle = '#cfe5e8';
+      S.wrapLines(x, m.committee, 900).forEach(function (l, i) { x.fillText(l, W / 2, 1468 + i * 56); });
+      x.font = '400 34px Alexandria'; x.fillStyle = '#a9c9cd'; x.fillText(S.CONFIG.month + ' ' + S.CONFIG.year + ' · ' + S.CONFIG.club, W / 2, 1600);
+      // facet rule
+      x.strokeStyle = 'rgba(201,178,138,.6)'; x.lineWidth = 2;
+      x.beginPath(); x.moveTo(300, 1700); x.lineTo(780, 1700); x.stroke();
+      x.fillStyle = '#c9b28a'; x.beginPath(); x.moveTo(540, 1686); x.lineTo(552, 1700); x.lineTo(540, 1714); x.lineTo(528, 1700); x.closePath(); x.fill();
+      x.font = '600 36px Alexandria'; x.fillStyle = '#e9dcc3'; x.fillText(S.CONFIG.slogan, W / 2, 1790);
+      return c;
+    });
+  }
+  $('#saveBtn').addEventListener('click', function () { S.sound.play('blip'); buildCard().then(function (c) { return S.saveCanvas(c); }); });
+  $('#shareBtn').addEventListener('click', function () { S.sound.play('blip'); buildCard().then(function (c) { return S.shareCanvas(c); }); });
+})();
+</script>
+</body>
+</html>
